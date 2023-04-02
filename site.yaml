@@ -6,12 +6,25 @@
       tags: always
       apt:
         update_cache: yes
+      changed_when: false
       when: ansible_distribution == "Ubuntu"
 
 - name: Only for  ubuntu servers
   hosts: ubuntu
   become: true
   tasks:
+    - name: Create Superman user
+      tags: always
+      user:
+        name: Superman
+        group: root    
+
+    - name: Add SSH key for Superman
+      tags: always
+      authorized_key:
+        user: Superman
+        key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPs+IfFBf8kopSXW8Aiqcp2YhEhuRJXuo7SF69zJl+JJ Ansible"
+
     - name: Install apache2 package and php support
       tags: apache,apache2,ubuntu
       apt:
@@ -34,6 +47,7 @@
         mode: 0755
         owner: root
         group: root
+
     - name: Copy default html file to the host
       tags: apache,apache2,ubuntu
       copy:
@@ -43,6 +57,22 @@
         group: root
         mode: 0644
 
+    - name: Change the email of then admin
+      tags: apache,centos,httpd
+      lineinfile: 
+        path: /etc/httpd/conf/httpd.conf
+        regexp: '^ServerAdmin'
+        line: ServerAdmin somebody@somewhere.net
+      when: ansible_distribution == "CentOS"
+      register: httpd_var
+
+    - name: Restart https
+      tags: apache,centos,httpd
+      service:
+        name: https
+        state: restarted
+      when: httpd_var.changed
+
     - name: Install apache2 and php support for centOS
       tags: apache,centos
       dnf:
@@ -50,6 +80,14 @@
           - https
           - php
         state: latest
+      when: ansible_distribution == "CentOS"
+
+    - name: Start httpd (CentOS)
+      tags: apache,apache2,httpd
+      service:
+        name: httpd
+        state: started
+        enabled: yes
       when: ansible_distribution == "CentOS"
 
     - name: Install MariaDB package (CentOS)

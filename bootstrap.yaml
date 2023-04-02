@@ -1,0 +1,35 @@
+- name: Install Apache
+  hosts: all
+  become: true
+  tasks:
+    - name: Update repo index
+      tags: always
+      apt:
+        update_cache: yes
+      when: ansible_distribution == "Ubuntu"
+
+- name: Only for  ubuntu servers
+  hosts: ubuntu
+  become: true
+  tasks:
+    - name: Create Superman user
+      tags: always
+      user:
+        name: Superman
+        group: root    
+
+    - name: Add SSH key for Superman
+      tags: always
+      authorized_key:
+        user: Superman
+        key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPs+IfFBf8kopSXW8Aiqcp2YhEhuRJXuo7SF69zJl+JJ Ansible"
+
+    - name: Add sudoers file for Superman
+      tags: always
+      copy:
+        src: sudoer_Superman
+        dest: /etc/sudoers.d/Superman
+        owner: root
+        group: root
+        mode: 0440
+
