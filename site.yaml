@@ -14,8 +14,8 @@
   tasks:
     - name: Install apache2 package and php support
       tags: apache,apache2,ubuntu
-      apt: 
-        name: 
+      apt:
+        name:
           - apache2
           - libapache2-mod-php
         state: latest
@@ -25,7 +25,7 @@
     - name: Install apache2 and php support for centOS
       tags: apache,centos
       dnf:
-        name: 
+        name:
           - https
           - php
         state: latest
@@ -43,4 +43,3 @@
       apt:
         name: mariadb-server
         state: latest
-      when: ansible_distribution == "Ubuntu"
