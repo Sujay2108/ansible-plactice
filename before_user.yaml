@@ -1,0 +1,66 @@
+- name: Install Apache
+  hosts: all
+  become: true
+  tasks:
+    - name: Update repo index
+      tags: always
+      apt:
+        update_cache: yes
+      when: ansible_distribution == "Ubuntu"
+
+- name: Only for  ubuntu servers
+  hosts: ubuntu
+  become: true
+  tasks:
+    - name: Install apache2 package and php support
+      tags: apache,apache2,ubuntu
+      apt:
+        name:
+          - apache2
+          - libapache2-mod-php
+        state: latest
+        update_cache: yes
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Install unzip
+      package:
+        name: unzip
+
+    - name: Install Terraform
+      unarchive:
+        src: https://releases.hashicorp.com/terraform/1.4.4/terraform_1.4.4_linux_386.zip
+        dest: /usr/local/bin
+        remote_src: yes
+        mode: 0755
+        owner: root
+        group: root
+    - name: Copy default html file to the host
+      tags: apache,apache2,ubuntu
+      copy:
+        src: default_site.html
+        dest: /var/www/html/index.html
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: Install apache2 and php support for centOS
+      tags: apache,centos
+      dnf:
+        name:
+          - https
+          - php
+        state: latest
+      when: ansible_distribution == "CentOS"
+
+    - name: Install MariaDB package (CentOS)
+      tags: apache,mariadb,centos
+      dnf:
+        name: mariadb
+        state: latest
+      when: ansible_distribution == "CentOS"
+
+    - name: Install MariaDB package (Ubuntu)
+      tags: ubuntu,apache,mariadb
+      apt:
+        name: mariadb-server
+        state: latest
