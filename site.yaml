@@ -22,6 +22,15 @@
         update_cache: yes
       when: ansible_distribution == "Ubuntu"
 
+    - name: Copy default html file to the host
+      tags: apache,apache2,ubuntu
+      copy:
+        src: default_site.html
+        dest: /var/www/html/index.html
+        owner: root
+        group: root
+        mode: 0644
+
     - name: Install apache2 and php support for centOS
       tags: apache,centos
       dnf:
